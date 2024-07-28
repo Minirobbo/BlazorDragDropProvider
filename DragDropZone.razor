@@ -1,0 +1,44 @@
+﻿@typeparam TItem
+@inject DragDropService dragDropService
+@implements IDragDropZone
+
+<div style=@getStyle() ondragend="@dragDropService.StopDrag" ondragover="@(() => dragDropService.SetOver(this))" ondragenter="" ondragleave="">
+    @foreach (object item in Items)
+    {
+        <div draggable="true" ondragstart="@(() => dragDropService.StartDrag(this, item))">
+            @ItemRenderer((TItem)item)
+        </div>
+        
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment<TItem> ItemRenderer { get; set; }
+
+    private List<object> Items { get; set; } = new();
+
+    public bool CanDropItem(object item) => item.GetType().IsSameOrSubClassOf(typeof(TItem));
+
+    public void DropItem(object item)
+    {
+        if (item.GetType().IsSameOrSubClassOf(typeof(TItem)))
+        {
+            Items.Add(item);
+            StateHasChanged();
+        }
+    }
+
+    public void RemoveItem(object item)
+    {
+        this.Items.Remove(item);
+        StateHasChanged();
+    }
+
+    private string getStyle()
+    {
+        string cursorStyle = dragDropService.CurrentType != null && typeof(TItem).IsSameOrSubClassOf(dragDropService.CurrentType) ? "cursor: move" : "cursor: no-drop";
+
+        return "border-width: 2px; border-style: dashed; border-color:black; padding: 2px; " + cursorStyle;
+    }
+}
