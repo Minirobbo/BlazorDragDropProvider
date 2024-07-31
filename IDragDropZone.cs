@@ -13,5 +13,7 @@ namespace DragDropProvider
         public void DropItem(object item);
 
         public void RemoveItem(object item);
+
+        public void UpdateCurrentZone(bool isCurrent);
     }
 }

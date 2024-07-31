@@ -1,14 +1,30 @@
 ﻿@typeparam TItem
 @inject DragDropService dragDropService
+@implements IDisposable
 @implements IDragDropZone
 
-<div style=@getStyle() ondragend="@dragDropService.StopDrag" ondragover="@(() => dragDropService.SetOver(this))" ondragenter="" ondragleave="">
-    @foreach (object item in Items)
+<div style=@getStyle() ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
+    @{int i = 0;}
+    @if (emptyAndHovering)
     {
-        <div draggable="true" ondragstart="@(() => dragDropService.StartDrag(this, item))">
+        <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px">
+        </div>
+    }
+
+    @while (i < Items.Count)
+    {
+        if (i == currentHoverIndex - 1)
+        {
+            <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px">
+            </div>
+        }
+
+        object item = Items[i];
+        <div draggable="true" ondragstart="@(() => dragDropService.StartDrag(this, item))" ondragover="@(() => DragOverItem(i))">
             @ItemRenderer((TItem)item)
         </div>
-        
+
+        i++;
     }
 </div>
 
@@ -18,6 +34,22 @@
 
     private List<object> Items { get; set; } = new();
 
+    private int currentHoverIndex = -1;
+
+    private bool emptyAndHovering => Items.Count == 0 && dragDropService.CanDropHere(this);
+
+    protected override void OnInitialized()
+    {
+        dragDropService.AddZone(this);
+        base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        dragDropService.RemoveZone(this);
+    }
+
+    //CHECK for interfaces and other types?
     public bool CanDropItem(object item) => item.GetType().IsSameOrSubClassOf(typeof(TItem));
 
     public void DropItem(object item)
@@ -40,5 +72,23 @@
         string cursorStyle = dragDropService.CurrentType != null && typeof(TItem).IsSameOrSubClassOf(dragDropService.CurrentType) ? "cursor: move" : "cursor: no-drop";
 
         return "border-width: 2px; border-style: dashed; border-color:black; padding: 2px; " + cursorStyle;
+    }
+
+    private void DragOverItem(int index)
+    {
+        if (dragDropService.CanDropHere(this))
+        {
+            currentHoverIndex = index;
+            StateHasChanged();
+        }
+    }
+
+    public void UpdateCurrentZone(bool isCurrent)
+    {
+        if (!isCurrent)
+        {
+            currentHoverIndex = -1;
+            StateHasChanged();
+        }
     }
 }

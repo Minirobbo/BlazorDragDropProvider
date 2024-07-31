@@ -13,7 +13,19 @@ namespace DragDropProvider
         private object? draggingObject;
         private bool IsDragging => draggingObject != null;
 
+        private List<IDragDropZone> draggingZones = new();
+
         public Type? CurrentType => IsDragging ? draggingObject.GetType() : null;
+
+        public void AddZone(IDragDropZone zone)
+        {
+            draggingZones.Add(zone);
+        }
+
+        public void RemoveZone(IDragDropZone zone)
+        {
+            draggingZones.Remove(zone);
+        }
 
         public void StartDrag(IDragDropZone zone, object obj)
         {
@@ -24,20 +36,36 @@ namespace DragDropProvider
 
         public void StopDrag()
         {
-            if (origin == null || draggingObject == null || target == null) return;
-
-            if (target != origin && target.CanDropItem(draggingObject))
+            if (origin == null || draggingObject == null || target == null)
+            {
+                draggingObject = null;
+            }
+            else if (target != origin && target.CanDropItem(draggingObject))
             {
                 target.DropItem(draggingObject);
                 origin.RemoveItem(draggingObject);
+                draggingObject = null;
             }
-
-            draggingObject = null;
+            draggingZones.ForEach(zone => { zone.UpdateCurrentZone(false); });
         }
 
         public void SetOver(IDragDropZone zone)
         {
-            target = zone;
+            if (target != zone)
+            {
+                target = zone;
+                draggingZones.ForEach(zone => { zone.UpdateCurrentZone(zone == target); });
+            }
+        }
+
+        public bool CanDropHere(IDragDropZone zone)
+        {
+            return origin != zone && target == zone && IsDragging && zone.CanDropItem(draggingObject);
+        }
+
+        public bool IsCurrent(IDragDropZone zone)
+        {
+            return target == zone;
         }
     }
 }
