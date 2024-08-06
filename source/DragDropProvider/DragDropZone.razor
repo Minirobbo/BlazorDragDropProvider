@@ -62,11 +62,11 @@
     }
 
     // TODO: CHECK for interfaces and other types?
-    public bool CanDropItem(object item) => item.GetType().IsSameOrSubClassOf(typeof(TItem));
+    public bool CanDropItem(object item) => typeof(TItem).IsCompatibleType(item.GetType());
 
     public void DropItem(object item)
     {
-        if (item.GetType().IsSameOrSubClassOf(typeof(TItem)))
+        if (CanDropItem(item))
         {
             int insertIndex = currentHoverIndex == -1 ? Items.Count : currentHoverIndex + 1;
             Items.Insert(insertIndex, item);

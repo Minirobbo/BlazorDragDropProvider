@@ -10,14 +10,18 @@ namespace DragDropProvider
     public static class ExtensionMethods
     {
         /// <summary>
-        /// Checks if another type is the same or is a subclass of current type.
+        /// Checks if another type is compatible with the current type.
+        /// 
+        /// A type is compatible with the current type if:
+        /// It is the same type or is a subclass of current type.
+        /// 
         /// </summary>
         /// <param name="self">This Type class</param>
         /// <param name="other">Type class to be compared to</param>
-        /// <returns>True, if the other Type class is the same or is a subclass of the current Type, otherwise False</returns>
-        public static bool IsSameOrSubClassOf(this Type self, Type other)
+        /// <returns>True, if the other Type class is compatible with the current Type, otherwise False</returns>
+        public static bool IsCompatibleType(this Type self, Type other)
         {
-            return self.IsSubclassOf(other) || self == other;
+            return self.IsAssignableFrom(other);
         }
 
         /// <summary>

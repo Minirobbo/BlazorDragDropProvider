@@ -4,21 +4,21 @@
 
 <h1>Hello, world!</h1>
 
-<DragDropZone @ref="dropZone" TItem="A" Name="1">
+<DragDropZone @ref="dropZone" TItem="IParaphrase" Name="1">
     <ItemRenderer>
-        <h1 style="color: red">@context.name</h1>
+        <h1 style="color: red">@context.Paraphrase()</h1>
     </ItemRenderer>
 </DragDropZone>
 
 <DragDropZone @ref="dropZone2" TItem="B" Name="2">
     <ItemRenderer>
-        <h1 style="color: blue">@context.name - @context.age</h1>
+        <h1 style="color: blue">@context.Paraphrase() - @context.age</h1>
     </ItemRenderer>
 </DragDropZone>
 
-<DragDropZone @ref="dropZone3" TItem="C" Name="3">
+<DragDropZone @ref="dropZone3" TItem="IParaphrase" Name="3">
     <ItemRenderer>
-        <h1 style="color: pink">@context.num</h1>
+        <h1 style="color: pink">@context.Paraphrase()</h1>
     </ItemRenderer>
 </DragDropZone>
 
@@ -29,9 +29,9 @@
 </DragDropZone>
 
 @code {
-    DragDropZone<A> dropZone;
+    DragDropZone<IParaphrase> dropZone;
     DragDropZone<B> dropZone2;
-    DragDropZone<C> dropZone3;
+    DragDropZone<IParaphrase> dropZone3;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -42,13 +42,23 @@
         base.OnAfterRender(firstRender);
     }
 
-    class A
+    interface IParaphrase
+    {
+        public string Paraphrase();
+    }
+
+    class A : IParaphrase
     {
         public string name;
 
         public A(string n)
         {
             name = n;
+        }
+
+        public string Paraphrase()
+        {
+            return name;
         }
     }
 
@@ -60,15 +70,25 @@
         {
             age = a;
         }
+
+        public new string Paraphrase()
+        {
+            return name + " (B)";
+        }
     }
 
-    class C
+    class C : IParaphrase
     {
         public int num;
 
         public C(int n)
         {
             num = n;
+        }
+
+        public string Paraphrase()
+        {
+            return num.ToString();
         }
     }
 
