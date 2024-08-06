@@ -60,12 +60,12 @@ namespace DragDropProvider
 
         public bool CanDropHere(IDragDropZone zone)
         {
-            return origin != zone && target == zone && IsDragging && zone.CanDropItem(draggingObject);
+            return origin != null && target != null && IsDragging && origin != zone && target == zone && zone.CanDropItem(draggingObject);
         }
 
         public bool IsCurrent(IDragDropZone zone)
         {
-            return target == zone;
+            return target == zone && IsDragging;
         }
     }
 }

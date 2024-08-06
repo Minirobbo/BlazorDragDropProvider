@@ -3,11 +3,12 @@
 @implements IDisposable
 @implements IDragDropZone
 
-<div style=@getStyle() ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
+<!--Make styling more simple? Maybe update styling when checking ondragover?-->
+<div style=@getStyle() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
     @{int i = 0;}
     @if (emptyAndHovering)
     {
-        <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px">
+        <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px;">
         </div>
     }
 
@@ -20,7 +21,7 @@
         }
 
         object item = Items[i];
-        <div draggable="true" ondragstart="@(() => dragDropService.StartDrag(this, item))" ondragover="@(() => DragOverItem(i))">
+        <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))" ondragover="@(() => DragOverItem(i))">
             @ItemRenderer((TItem)item)
         </div>
 
@@ -32,11 +33,19 @@
     [Parameter]
     public RenderFragment<TItem> ItemRenderer { get; set; }
 
+    [Parameter]
+    public string Name { get; set; }
+
     private List<object> Items { get; set; } = new();
 
     private int currentHoverIndex = -1;
 
     private bool emptyAndHovering => Items.Count == 0 && dragDropService.CanDropHere(this);
+
+    public override string ToString()
+    {
+        return Name;
+    }
 
     protected override void OnInitialized()
     {
@@ -69,7 +78,17 @@
 
     private string getStyle()
     {
-        string cursorStyle = dragDropService.CurrentType != null && typeof(TItem).IsSameOrSubClassOf(dragDropService.CurrentType) ? "cursor: move" : "cursor: no-drop";
+        string cursorStyle = "";
+        if (dragDropService.CanDropHere(this))
+        {
+            Console.WriteLine("CAN DROP HERE " + this.ToString());
+            cursorStyle = "cursor: copy;";
+        } 
+        else if (dragDropService.IsCurrent(this))
+        {
+            Console.WriteLine("CAN'T DROP HERE " + this.ToString());
+            cursorStyle = "cursor: no-drop;";
+        }
 
         return "border-width: 2px; border-style: dashed; border-color:black; padding: 2px; " + cursorStyle;
     }
@@ -79,8 +98,8 @@
         if (dragDropService.CanDropHere(this))
         {
             currentHoverIndex = index;
-            StateHasChanged();
         }
+        StateHasChanged();
     }
 
     public void UpdateCurrentZone(bool isCurrent)
