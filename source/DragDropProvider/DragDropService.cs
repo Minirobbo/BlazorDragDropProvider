@@ -46,6 +46,8 @@ namespace DragDropProvider
                 origin.RemoveItem(draggingObject);
                 draggingObject = null;
             }
+            origin = null;
+            target = null;
             draggingZones.ForEach(zone => { zone.UpdateCurrentZone(false); });
         }
 
@@ -53,8 +55,10 @@ namespace DragDropProvider
         {
             if (target != zone)
             {
+                target?.UpdateCurrentZone(false);
                 target = zone;
-                draggingZones.ForEach(zone => { zone.UpdateCurrentZone(zone == target); });
+                target.UpdateCurrentZone(true);
+                //draggingZones.ForEach(zone => { zone.UpdateCurrentZone(zone == target); });
             }
         }
 

@@ -4,7 +4,7 @@
 @implements IDragDropZone
 
 <!--Make styling more simple? Maybe update styling when checking ondragover?-->
-<div style=@getStyle() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
+<div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
     @{int i = 0;}
     @if (emptyAndHovering)
     {
@@ -14,15 +14,18 @@
 
     @while (i < Items.Count)
     {
-        if (i == currentHoverIndex - 1)
-        {
-            <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px">
-            </div>
-        }
-
         object item = Items[i];
-        <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))" ondragover="@(() => DragOverItem(i))">
-            @ItemRenderer((TItem)item)
+        int index = i;
+        <div ondragover="@(() => DragOverItem(index))">
+            <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))">
+                @ItemRenderer((TItem)item)
+            </div>
+
+            @if (i == currentHoverIndex)
+            {
+                <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px">
+                </div>
+            }
         </div>
 
         i++;
@@ -58,14 +61,15 @@
         dragDropService.RemoveZone(this);
     }
 
-    //CHECK for interfaces and other types?
+    // TODO: CHECK for interfaces and other types?
     public bool CanDropItem(object item) => item.GetType().IsSameOrSubClassOf(typeof(TItem));
 
     public void DropItem(object item)
     {
         if (item.GetType().IsSameOrSubClassOf(typeof(TItem)))
         {
-            Items.Add(item);
+            int insertIndex = currentHoverIndex == -1 ? Items.Count : currentHoverIndex + 1;
+            Items.Insert(insertIndex, item);
             StateHasChanged();
         }
     }
@@ -76,21 +80,23 @@
         StateHasChanged();
     }
 
-    private string getStyle()
+    private string getClasses()
     {
-        string cursorStyle = "";
-        if (dragDropService.CanDropHere(this))
+        List<string> classes = new() { "dropZone" };
+
+        bool isCurrent = dragDropService.IsCurrent(this);
+        bool isValid = dragDropService.CanDropHere(this);
+
+        if (isCurrent && isValid)
         {
-            Console.WriteLine("CAN DROP HERE " + this.ToString());
-            cursorStyle = "cursor: copy;";
+            classes.Add("drop");
         } 
-        else if (dragDropService.IsCurrent(this))
+        else if (isCurrent)
         {
-            Console.WriteLine("CAN'T DROP HERE " + this.ToString());
-            cursorStyle = "cursor: no-drop;";
+            classes.Add("noDrop");
         }
 
-        return "border-width: 2px; border-style: dashed; border-color:black; padding: 2px; " + cursorStyle;
+        return String.Join(" ", classes.ToArray());
     }
 
     private void DragOverItem(int index)
@@ -107,7 +113,7 @@
         if (!isCurrent)
         {
             currentHoverIndex = -1;
-            StateHasChanged();
         }
+        StateHasChanged();
     }
 }

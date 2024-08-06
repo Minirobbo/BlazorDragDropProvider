@@ -1,0 +1,16 @@
+﻿.dropZone {
+    border-width: 2px;
+    border-style: dashed;
+    border-color: black;
+    padding: 2px;
+}
+
+.noDrop {
+    cursor: no-drop;
+    border-color: red;
+}
+
+.drop {
+    cursor: copy;
+    border-color: green;
+}
