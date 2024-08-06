@@ -1,0 +1,75 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<DragDropZone @ref="dropZone" TItem="A" Name="1">
+    <ItemRenderer>
+        <h1 style="color: red">@context.name</h1>
+    </ItemRenderer>
+</DragDropZone>
+
+<DragDropZone @ref="dropZone2" TItem="B" Name="2">
+    <ItemRenderer>
+        <h1 style="color: blue">@context.name - @context.age</h1>
+    </ItemRenderer>
+</DragDropZone>
+
+<DragDropZone @ref="dropZone3" TItem="C" Name="3">
+    <ItemRenderer>
+        <h1 style="color: pink">@context.num</h1>
+    </ItemRenderer>
+</DragDropZone>
+
+<DragDropZone TItem="B" Name="4">
+    <ItemRenderer>
+        <h1 style="color: yellow">@context.name - @context.age</h1>
+    </ItemRenderer>
+</DragDropZone>
+
+@code {
+    DragDropZone<A> dropZone;
+    DragDropZone<B> dropZone2;
+    DragDropZone<C> dropZone3;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        dropZone.DropItem(new B("Isaac", 21));
+        dropZone.DropItem(new A("Johnny"));
+        dropZone2.DropItem(new B("Bob", 12));
+        dropZone3.DropItem(new C(41));
+        base.OnAfterRender(firstRender);
+    }
+
+    class A
+    {
+        public string name;
+
+        public A(string n)
+        {
+            name = n;
+        }
+    }
+
+    class B : A
+    {
+        public int age;
+
+        public B(string n, int a) : base(n)
+        {
+            age = a;
+        }
+    }
+
+    class C
+    {
+        public int num;
+
+        public C(int n)
+        {
+            num = n;
+        }
+    }
+
+}
