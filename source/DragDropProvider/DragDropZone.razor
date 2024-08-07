@@ -51,6 +51,12 @@
     [Parameter]
     public string Name { get; set; }
 
+    [Parameter]
+    public string CanDropClass { get; set; } = "";
+
+    [Parameter]
+    public string NoDropClass { get; set; } = "";
+
     private List<object> Items { get; set; } = new();
 
     private int currentHoverIndex = -1;
@@ -101,11 +107,11 @@
 
         if (isCurrent && isValid)
         {
-            classes.Add("drop");
+            classes.Add(CanDropClass);
         } 
         else if (isCurrent)
         {
-            classes.Add("noDrop");
+            classes.Add(NoDropClass);
         }
 
         return String.Join(" ", classes.ToArray());
