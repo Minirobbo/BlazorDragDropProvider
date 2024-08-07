@@ -3,38 +3,50 @@
 @implements IDisposable
 @implements IDragDropZone
 
-<!--Make styling more simple? Maybe update styling when checking ondragover?-->
 <div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
-    @{int i = 0;}
-    @if (emptyAndHovering)
+    
+    @if (DropOnly)
     {
-        <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px;">
+        <div class="dropZoneOnly">
+            <h1>@Name</h1>
         </div>
     }
-
-    @while (i < Items.Count)
+    else
     {
-        object item = Items[i];
-        int index = i;
-        <div ondragover="@(() => DragOverItem(index))">
-            <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))">
-                @ItemRenderer((TItem)item)
+        int i = 0;
+        if (emptyAndHovering)
+        {
+            <div class="dropOutline">
+            </div>
+        }
+
+        while (i < Items.Count)
+        {
+            object item = Items[i];
+            int index = i;
+            <div ondragover="@(() => DragOverItem(index))">
+                <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))">
+                    @ItemRenderer((TItem)item)
+                </div>
+
+                @if (i == currentHoverIndex)
+                {
+                    <div class="dropOutline">
+                    </div>
+                }
             </div>
 
-            @if (i == currentHoverIndex)
-            {
-                <div style="border-width: 1px; border-style: dashed; border-color:green; padding: 2px; height: 100px">
-                </div>
-            }
-        </div>
-
-        i++;
+            i++;
+        }
     }
 </div>
 
 @code {
     [Parameter]
     public RenderFragment<TItem> ItemRenderer { get; set; }
+
+    [Parameter]
+    public bool DropOnly { get; set; } = false;
 
     [Parameter]
     public string Name { get; set; }

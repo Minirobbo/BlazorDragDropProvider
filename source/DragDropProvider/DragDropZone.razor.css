@@ -5,6 +5,22 @@
     padding: 2px;
 }
 
+.dropOutline {
+    border-width: 1px;
+    border-style: dashed;
+    border-color: green;
+    padding: 2px;
+    height: 100px;
+}
+
+.dropZoneOnly {
+    border-width: 2px;
+    border-style: solid;
+    border-color: black;
+    padding: 5px;
+    align-content: center;
+}
+
 .noDrop {
     cursor: no-drop;
     border-color: red;
