@@ -1,0 +1,33 @@
+﻿@typeparam TItem
+@inject DragDropService dragDropService
+@implements IDragDropSource
+
+@foreach (object item in Items)
+{
+    <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))" ondragend="@dragDropService.StopDrag">
+        @ItemRenderer((TItem)item)
+    </div>
+}
+
+@code {
+    [Parameter]
+    public required RenderFragment<TItem> ItemRenderer { get; set; }
+
+    [Parameter]
+    public required List<object> Items { get; set; }
+
+    [Parameter]
+    public bool RenewableItems { get; set; } = false;
+
+    [Parameter]
+    public string? Title { get; set; } = null;
+
+    public void RemoveItem(object item)
+    {
+        if (!RenewableItems)
+        {
+            Items.Remove(item);
+        }
+        StateHasChanged();
+    }
+}

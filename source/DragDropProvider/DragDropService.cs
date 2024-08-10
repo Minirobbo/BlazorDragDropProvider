@@ -8,7 +8,7 @@ namespace DragDropProvider
 {
     public class DragDropService
     {
-        private IDragDropZone? origin;
+        private IDragDropSource? origin;
         private IDragDropZone? target;
         private object? draggingObject;
         private bool IsDragging => draggingObject != null;
@@ -27,9 +27,9 @@ namespace DragDropProvider
             draggingZones.Remove(zone);
         }
 
-        public void StartDrag(IDragDropZone zone, object obj)
+        public void StartDrag(IDragDropSource source, object obj)
         {
-            origin = zone;
+            origin = source;
             target = null;
             draggingObject = obj;
         }

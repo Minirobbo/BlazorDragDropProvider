@@ -4,17 +4,17 @@
 
 <h1>Hello, world!</h1>
 
-<DragDropZone @ref="dropZone" TItem="IParaphrase" Title="1">
+<DraggableItemSource @ref="dropZone" TItem="IParaphrase" Title="1" Items="@(new List<object>() {new B("Isaac", 21), new A("Johnny")})">
     <ItemRenderer>
         <h1 style="color: red">@context.Paraphrase()</h1>
     </ItemRenderer>
-</DragDropZone>
+</DraggableItemSource>
 
-<DragDropZone @ref="dropZone2" TItem="B" Title="2">
+<DraggableItemSource @ref="dropZone2" TItem="B" Title="2" Items="@(new List<object>() {new B("Bob", 12)})" RenewableItems="true">
     <ItemRenderer>
         <h1 style="color: blue">@context.Paraphrase() - @context.age</h1>
     </ItemRenderer>
-</DragDropZone>
+</DraggableItemSource>
 
 <DragDropZone @ref="dropZone3" TItem="IParaphrase" Title="3" CanReorder="true">
     <ItemRenderer>
@@ -29,15 +29,12 @@
 </DragDropZone>
 
 @code {
-    DragDropZone<IParaphrase> dropZone;
-    DragDropZone<B> dropZone2;
+    DraggableItemSource<IParaphrase> dropZone;
+    DraggableItemSource<B> dropZone2;
     DragDropZone<IParaphrase> dropZone3;
 
     protected override void OnAfterRender(bool firstRender)
     {
-        dropZone.DropItem(new B("Isaac", 21));
-        dropZone.DropItem(new A("Johnny"));
-        dropZone2.DropItem(new B("Bob", 12));
         dropZone3.DropItem(new C(41));
         base.OnAfterRender(firstRender);
     }

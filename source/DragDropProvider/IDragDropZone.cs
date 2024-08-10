@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace DragDropProvider
 {
-    public interface IDragDropZone
+    public interface IDragDropZone : IDragDropSource
     {
         public bool CanDropItem(object item);
 
         public void DropItem(object item);
-
-        public void RemoveItem(object item);
         
         public void ReorderItem(object item);
 
