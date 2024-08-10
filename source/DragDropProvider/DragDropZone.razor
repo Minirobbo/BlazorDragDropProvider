@@ -3,15 +3,23 @@
 @implements IDisposable
 @implements IDragDropZone
 
-<div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@(() => {dragDropService.SetOver(this); if (emptyAndHovering) {StateHasChanged();}})" ondragenter="" ondragleave="@(() => {currentHoverIndex = -1;})">
+<div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@DragOverZone" ondragleave="@(() => {currentHoverIndex = -1;})">
     
-    @if (DropOnly)
+    @if (ShowHeader)
     {
         <div class="dropZoneOnly">
-            <h1>@Name</h1>
+            @if (ZoneHeader == null)
+            {
+                <h1>@Title</h1>
+            }
+            else
+            {
+                @ZoneHeader
+            }
         </div>
     }
-    else
+
+    @if (ShowItems)
     {
         int i = 0;
         if (emptyAndHovering)
@@ -29,7 +37,7 @@
                     @ItemRenderer((TItem)item)
                 </div>
 
-                @if (i == currentHoverIndex)
+                @if (i == currentHoverIndex && CanReorder)
                 {
                     <div class="dropOutline">
                     </div>
@@ -43,19 +51,30 @@
 
 @code {
     [Parameter]
-    public RenderFragment<TItem> ItemRenderer { get; set; }
+    public required RenderFragment<TItem> ItemRenderer { get; set; }
 
     [Parameter]
-    public bool DropOnly { get; set; } = false;
+    public RenderFragment? ZoneHeader { get; set; }
 
     [Parameter]
-    public string Name { get; set; }
+    public bool ShowItems { get; set; } = true;
+
+    [Parameter]
+    public string? Title { get; set; } = null;
 
     [Parameter]
     public string CanDropClass { get; set; } = "";
 
     [Parameter]
     public string NoDropClass { get; set; } = "";
+
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    [Parameter]
+    public bool CanReorder { get; set; } = false;
+
+    private bool ShowHeader => ZoneHeader != null || Title != null;
 
     private List<object> Items { get; set; } = new();
 
@@ -65,7 +84,7 @@
 
     public override string ToString()
     {
-        return Name;
+        return Title;
     }
 
     protected override void OnInitialized()
@@ -87,7 +106,7 @@
         if (CanDropItem(item))
         {
             int insertIndex = currentHoverIndex == -1 ? Items.Count : currentHoverIndex + 1;
-            Items.Insert(insertIndex, item);
+            Items.Insert(CanReorder ? insertIndex : Items.Count, item); //Only insert if reorder is enabled.
             StateHasChanged();
         }
     }
@@ -98,9 +117,18 @@
         StateHasChanged();
     }
 
+    public void ReorderItem(object item)
+    {
+        int index = this.Items.IndexOf(item);
+        this.Items.Remove(item);
+        currentHoverIndex -= index <= currentHoverIndex ? 1 : 0;
+        this.Items.Insert(Math.Min(currentHoverIndex+1, Items.Count), item);
+        StateHasChanged();
+    }
+
     private string getClasses()
     {
-        List<string> classes = new() { "dropZone" };
+        List<string> classes = new() { "dropZone", Class };
 
         bool isCurrent = dragDropService.IsCurrent(this);
         bool isValid = dragDropService.CanDropHere(this);
@@ -115,6 +143,15 @@
         }
 
         return String.Join(" ", classes.ToArray());
+    }
+
+    private void DragOverZone()
+    {
+        dragDropService.SetOver(this);
+        if (emptyAndHovering)
+        {
+            StateHasChanged();
+        }
     }
 
     private void DragOverItem(int index)
@@ -134,4 +171,5 @@
         }
         StateHasChanged();
     }
+
 }

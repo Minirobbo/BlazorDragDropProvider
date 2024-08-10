@@ -40,10 +40,17 @@ namespace DragDropProvider
             {
                 draggingObject = null;
             }
-            else if (target != origin && target.CanDropItem(draggingObject))
+            else if ((target != origin || target.CanReorder) && target.CanDropItem(draggingObject))
             {
-                target.DropItem(draggingObject);
-                origin.RemoveItem(draggingObject);
+                if (target == origin)
+                {
+                    target.ReorderItem(draggingObject);
+                }
+                else
+                {
+                    origin.RemoveItem(draggingObject);
+                    target.DropItem(draggingObject);
+                }
                 draggingObject = null;
             }
             origin = null;
@@ -64,7 +71,7 @@ namespace DragDropProvider
 
         public bool CanDropHere(IDragDropZone zone)
         {
-            return origin != null && target != null && IsDragging && origin != zone && target == zone && zone.CanDropItem(draggingObject);
+            return origin != null && target != null && IsDragging && (origin != zone || zone.CanReorder) && target == zone && zone.CanDropItem(draggingObject);
         }
 
         public bool IsCurrent(IDragDropZone zone)

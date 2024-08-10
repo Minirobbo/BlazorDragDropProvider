@@ -4,25 +4,25 @@
 
 <h1>Hello, world!</h1>
 
-<DragDropZone @ref="dropZone" TItem="IParaphrase" Name="1">
+<DragDropZone @ref="dropZone" TItem="IParaphrase" Title="1">
     <ItemRenderer>
         <h1 style="color: red">@context.Paraphrase()</h1>
     </ItemRenderer>
 </DragDropZone>
 
-<DragDropZone @ref="dropZone2" TItem="B" Name="2">
+<DragDropZone @ref="dropZone2" TItem="B" Title="2">
     <ItemRenderer>
         <h1 style="color: blue">@context.Paraphrase() - @context.age</h1>
     </ItemRenderer>
 </DragDropZone>
 
-<DragDropZone @ref="dropZone3" TItem="IParaphrase" Name="3">
+<DragDropZone @ref="dropZone3" TItem="IParaphrase" Title="3" CanReorder="true">
     <ItemRenderer>
         <h1 style="color: pink">@context.Paraphrase()</h1>
     </ItemRenderer>
 </DragDropZone>
 
-<DragDropZone TItem="B" Name="4" DropOnly="true">
+<DragDropZone TItem="B" Title="4" ShowItems="true">
     <ItemRenderer>
         <h1 style="color: yellow">@context.name - @context.age</h1>
     </ItemRenderer>
