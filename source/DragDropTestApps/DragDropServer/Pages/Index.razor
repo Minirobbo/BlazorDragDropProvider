@@ -16,7 +16,7 @@
     </ItemRenderer>
 </DraggableItemSource>
 
-<DragDropZone @ref="dropZone3" TItem="IParaphrase" Title="3" CanReorder="true">
+<DragDropZone @ref="dropZone3" TItem="IParaphrase" Title="3" CanReorder="true" Class="d-flex flex-column">
     <ItemRenderer>
         <h1 style="color: pink">@context.Paraphrase()</h1>
     </ItemRenderer>
@@ -35,7 +35,7 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        dropZone3.DropItem(new C(41));
+        // dropZone3.DropItem(new C(41));
         base.OnAfterRender(firstRender);
     }
 

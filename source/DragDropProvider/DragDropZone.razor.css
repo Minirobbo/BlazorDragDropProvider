@@ -3,6 +3,7 @@
     border-style: dashed;
     border-color: black;
     padding: 2px;
+    margin: 1px;
 }
 
 .dropOutline {
@@ -10,7 +11,14 @@
     border-style: dashed;
     border-color: green;
     padding: 2px;
-    height: 2px;
+    display: inherit;
+}
+
+.itemWrapper {
+    display: inherit;
+    -ms-flex-direction: inherit;
+    -webkit-flex-direction: inherit;
+    flex-direction: inherit;
 }
 
 .dropZoneOnly {

@@ -78,5 +78,13 @@ namespace DragDropProvider
         {
             return target == zone && IsDragging;
         }
+
+        public void LeaveZone(IDragDropZone zone)
+        {
+            if (zone == target)
+            {
+                target = null;
+            }
+        }
     }
 }

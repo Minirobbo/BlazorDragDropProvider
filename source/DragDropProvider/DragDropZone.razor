@@ -3,7 +3,7 @@
 @implements IDisposable
 @implements IDragDropZone
 
-<div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@DragOverZone" ondragleave="@(() => {currentHoverIndex = -1;})">
+<div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@DragOverZone" ondragleave="LeaveZone">
     
     @if (ShowHeader)
     {
@@ -32,19 +32,24 @@
         {
             object item = Items[i];
             int index = i;
-            <div ondragover="@(() => DragOverItem(index))">
-                <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))">
-                    @ItemRenderer((TItem)item)
-                </div>
-
-                @if (i == currentHoverIndex && CanReorder)
+            <div ondragover="@(() => DragOverItem(index))" class="itemWrapper">
+                @if (i == currentHoverIndex)
                 {
                     <div class="dropOutline">
                     </div>
                 }
+                <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))">
+                    @ItemRenderer((TItem)item)
+                </div>
             </div>
 
             i++;
+        }
+
+        @if (CanReorder && currentHoverIndex == -1 && dragDropService.IsCurrent(this))
+        {
+            <div class="dropOutline">
+            </div>
         }
     }
 </div>
@@ -80,7 +85,9 @@
 
     private int currentHoverIndex = -1;
 
-    private bool emptyAndHovering => Items.Count == 0 && dragDropService.CanDropHere(this);
+    private bool emptyAndHovering => CanReorder && Items.Count == 0 && dragDropService.CanDropHere(this);
+
+    private int hoverCounter = 0;
 
     public override string ToString()
     {
@@ -105,8 +112,8 @@
     {
         if (CanDropItem(item))
         {
-            int insertIndex = currentHoverIndex == -1 ? Items.Count : currentHoverIndex + 1;
-            Items.Insert(CanReorder ? insertIndex : Items.Count, item); //Only insert if reorder is enabled.
+            int insertIndex = currentHoverIndex == -1 ? Items.Count : currentHoverIndex;
+            Items.Insert(Math.Min(insertIndex, Items.Count), item);
             StateHasChanged();
         }
     }
@@ -119,11 +126,14 @@
 
     public void ReorderItem(object item)
     {
-        int index = this.Items.IndexOf(item);
-        this.Items.Remove(item);
-        currentHoverIndex -= index <= currentHoverIndex ? 1 : 0;
-        this.Items.Insert(Math.Min(currentHoverIndex+1, Items.Count), item);
-        StateHasChanged();
+        if (CanDropItem(item))
+        {
+            int insertIndex = currentHoverIndex == -1 ? Items.Count : currentHoverIndex;
+            insertIndex -= Items.IndexOf(item) < currentHoverIndex ? 1 : 0; //remove 1 index if item is currently appearing before where it is being dropped.
+            Items.Remove(item);
+            Items.Insert(Math.Min(Items.Count, insertIndex), item);
+            StateHasChanged();
+        }
     }
 
     private string getClasses()
@@ -132,6 +142,8 @@
 
         bool isCurrent = dragDropService.IsCurrent(this);
         bool isValid = dragDropService.CanDropHere(this);
+
+        Console.WriteLine($"{isCurrent} {isValid}");
 
         if (isCurrent && isValid)
         {
@@ -154,8 +166,14 @@
         }
     }
 
+    private void LeaveZone(DragEventArgs eventArgs)
+    {
+        currentHoverIndex = -1;
+    }
+
     private void DragOverItem(int index)
     {
+        Console.WriteLine($"Dragged over {index}");
         if (dragDropService.CanDropHere(this))
         {
             currentHoverIndex = index;
