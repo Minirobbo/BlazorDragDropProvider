@@ -24,13 +24,13 @@ namespace DragDropProvider
             return self.IsAssignableFrom(other);
         }
 
-        /// <summary>
-        /// Adds required services to a dependancy injection IServiceCollection
-        /// </summary>
-        /// <param name="services">Current services to be added to</param>
-        public static void AddDragDropServices(this IServiceCollection services)
-        {
-            services.AddScoped<DragDropService>();
-        }
+        ///// <summary>
+        ///// Adds required services to a dependancy injection IServiceCollection
+        ///// </summary>
+        ///// <param name="services">Current services to be added to</param>
+        //public static void AddDragDropServices(this IServiceCollection services)
+        //{
+        //    services.AddScoped<DragDropService>();
+        //}
     }
 }

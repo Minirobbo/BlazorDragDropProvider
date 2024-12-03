@@ -6,28 +6,28 @@ using System.Threading.Tasks;
 
 namespace DragDropProvider
 {
-    public class DragDropService
+    public class DragDropService<TItem> where TItem : class
     {
-        private IDragDropSource? origin;
-        private IDragDropZone? target;
-        private object? draggingObject;
+        private IDragDropSource<TItem>? origin;
+        private IDragDropZone<TItem>? target;
+        private TItem? draggingObject;
         private bool IsDragging => draggingObject != null;
 
-        private List<IDragDropZone> draggingZones = new();
+        private List<IDragDropZone<TItem>> draggingZones = new();
 
         public Type? CurrentType => IsDragging ? draggingObject.GetType() : null;
 
-        public void AddZone(IDragDropZone zone)
+        public void AddZone(IDragDropZone<TItem> zone)
         {
             draggingZones.Add(zone);
         }
 
-        public void RemoveZone(IDragDropZone zone)
+        public void RemoveZone(IDragDropZone<TItem> zone)
         {
             draggingZones.Remove(zone);
         }
 
-        public void StartDrag(IDragDropSource source, object obj)
+        public void StartDrag(IDragDropSource<TItem> source, TItem? obj)
         {
             origin = source;
             target = null;
@@ -58,7 +58,7 @@ namespace DragDropProvider
             draggingZones.ForEach(zone => { zone.UpdateCurrentZone(false); });
         }
 
-        public void SetOver(IDragDropZone zone)
+        public void SetOver(IDragDropZone<TItem> zone)
         {
             if (target != zone)
             {
@@ -69,17 +69,17 @@ namespace DragDropProvider
             }
         }
 
-        public bool CanDropHere(IDragDropZone zone)
+        public bool CanDropHere(IDragDropZone<TItem> zone)
         {
             return origin != null && target != null && IsDragging && (origin != zone || zone.CanReorder) && target == zone && zone.CanDropItem(draggingObject);
         }
 
-        public bool IsCurrent(IDragDropZone zone)
+        public bool IsCurrent(IDragDropZone<TItem> zone)
         {
             return target == zone && IsDragging;
         }
 
-        public void LeaveZone(IDragDropZone zone)
+        public void LeaveZone(IDragDropZone<TItem> zone)
         {
             if (zone == target)
             {

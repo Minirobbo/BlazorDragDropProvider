@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DragDropProvider
 {
-    public interface IDragDropSource
+    public interface IDragDropSource<TItem>
     {
-        public void RemoveItem(object item);
+        public void RemoveItem(TItem item);
     }
 }

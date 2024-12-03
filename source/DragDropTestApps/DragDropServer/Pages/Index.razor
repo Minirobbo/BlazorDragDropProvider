@@ -4,33 +4,41 @@
 
 <h1>Hello, world!</h1>
 
-<DraggableItemSource @ref="dropZone" TItem="IParaphrase" Title="1" Items="@(new List<object>() {new B("Isaac", 21), new A("Johnny")})">
-    <ItemRenderer>
-        <h1 style="color: red">@context.Paraphrase()</h1>
-    </ItemRenderer>
-</DraggableItemSource>
+<CascadingValue Value="new DragDropService<IParaphrase>()">
+    <DraggableItemSource @ref="dropZone" TItem="IParaphrase" Title="1" Items="@(new List<IParaphrase>() {new B("Isaac", 21), new A("Johnny")})">
+        <ItemRenderer>
+            <h1 style="color: red">@context.Paraphrase()</h1>
+        </ItemRenderer>
+    </DraggableItemSource>
 
-<DraggableItemSource @ref="dropZone2" TItem="B" Title="2" Items="@(new List<object>() {new B("Bob", 12)})" RenewableItems="true">
-    <ItemRenderer>
-        <h1 style="color: blue">@context.Paraphrase() - @context.age</h1>
-    </ItemRenderer>
-</DraggableItemSource>
+    <DraggableItemSource @ref="dropZone2" TItem="IParaphrase" Title="2" Items="@(new List<IParaphrase>() {new B("Bob", 12)})" RenewableItems="true">
+        <ItemRenderer>
+            <h1 style="color: blue">@context.Paraphrase() - @(((B)context).age)</h1>
+        </ItemRenderer>
+    </DraggableItemSource>
 
-<DragDropZone @ref="dropZone3" TItem="IParaphrase" Title="3" CanReorder="true" Class="d-flex flex-column">
-    <ItemRenderer>
-        <h1 style="color: pink">@context.Paraphrase()</h1>
-    </ItemRenderer>
-</DragDropZone>
+    <DragDropZone @ref="dropZone3" TItem="IParaphrase" Title="3" CanReorder="true" Class="d-flex flex-column">
+        <ItemRenderer>
+            <div @ondragend:stopPropagation @ondragover:stopPropagation @ondragenter:stopPropagation @ondrag:stopPropagation>
+                <DragDropZone TItem="IParaphrase" Title="Row" CanReorder="true" Class="d-flex flex-row">
+                    <ItemRenderer Context="inner">
+                        <h1 style="color: pink">@inner.Paraphrase()</h1>
+                    </ItemRenderer>
+                </DragDropZone>
+            </div>
+        </ItemRenderer>
+    </DragDropZone>
 
-<DragDropZone TItem="B" Title="4" ShowItems="true">
-    <ItemRenderer>
-        <h1 style="color: yellow">@context.name - @context.age</h1>
-    </ItemRenderer>
-</DragDropZone>
+    <DragDropZone TItem="IParaphrase" Title="4" ShowItems="true">
+        <ItemRenderer>
+            <h1 style="color: yellow">@(((B)context).name) - @(((B)context).age)</h1>
+        </ItemRenderer>
+    </DragDropZone>
+</CascadingValue>
 
 @code {
     DraggableItemSource<IParaphrase> dropZone;
-    DraggableItemSource<B> dropZone2;
+    DraggableItemSource<IParaphrase> dropZone2;
     DragDropZone<IParaphrase> dropZone3;
 
     protected override void OnAfterRender(bool firstRender)

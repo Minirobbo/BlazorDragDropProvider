@@ -1,9 +1,8 @@
-﻿@typeparam TItem
-@inject DragDropService dragDropService
+﻿@typeparam TItem where TItem : class
 @implements IDisposable
-@implements IDragDropZone
+@implements IDragDropZone<TItem>
 
-<div class=@getClasses() @ondragover:preventDefault ondragend="@dragDropService.StopDrag" ondragover="@DragOverZone" ondragleave="LeaveZone">
+<div class=@getClasses() @ondragover:preventDefault ondragend="@DragDropService.StopDrag" ondragover="@DragOverZone" ondragleave="@LeaveZone">
     
     @if (ShowHeader)
     {
@@ -30,7 +29,7 @@
 
         while (i < Items.Count)
         {
-            object item = Items[i];
+            TItem item = Items[i];
             int index = i;
             <div ondragover="@(() => DragOverItem(index))" class="itemWrapper">
                 @if (i == currentHoverIndex)
@@ -38,7 +37,7 @@
                     <div class="dropOutline">
                     </div>
                 }
-                <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))">
+                <div draggable="true" @ondragover:preventDefault ondragstart="@(() => DragDropService.StartDrag(this, item))">
                     @ItemRenderer((TItem)item)
                 </div>
             </div>
@@ -46,7 +45,7 @@
             i++;
         }
 
-        @if (CanReorder && currentHoverIndex == -1 && dragDropService.IsCurrent(this))
+        @if (CanReorder && currentHoverIndex == -1 && DragDropService.IsCurrent(this))
         {
             <div class="dropOutline">
             </div>
@@ -81,34 +80,37 @@
 
     private bool ShowHeader => ZoneHeader != null || Title != null;
 
-    private List<object> Items { get; set; } = new();
+    private List<TItem> Items { get; set; } = new();
 
     private int currentHoverIndex = -1;
 
-    private bool emptyAndHovering => CanReorder && Items.Count == 0 && dragDropService.CanDropHere(this);
+    private bool emptyAndHovering => CanReorder && Items.Count == 0 && DragDropService.CanDropHere(this);
 
     private int hoverCounter = 0;
+    
+    [CascadingParameter]
+    private DragDropService<TItem> DragDropService { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        DragDropService.AddZone(this);
+    }
 
     public override string ToString()
     {
         return Title;
     }
 
-    protected override void OnInitialized()
-    {
-        dragDropService.AddZone(this);
-        base.OnInitialized();
-    }
-
     public void Dispose()
     {
-        dragDropService.RemoveZone(this);
+        DragDropService.RemoveZone(this);
     }
 
     // TODO: CHECK for interfaces and other types?
-    public bool CanDropItem(object item) => typeof(TItem).IsCompatibleType(item.GetType());
+    public bool CanDropItem(TItem item) => typeof(TItem).IsCompatibleType(item.GetType());
 
-    public void DropItem(object item)
+    public void DropItem(TItem item)
     {
         if (CanDropItem(item))
         {
@@ -118,13 +120,13 @@
         }
     }
 
-    public void RemoveItem(object item)
+    public void RemoveItem(TItem item)
     {
         this.Items.Remove(item);
         StateHasChanged();
     }
 
-    public void ReorderItem(object item)
+    public void ReorderItem(TItem item)
     {
         if (CanDropItem(item))
         {
@@ -140,10 +142,15 @@
     {
         List<string> classes = new() { "dropZone", Class };
 
-        bool isCurrent = dragDropService.IsCurrent(this);
-        bool isValid = dragDropService.CanDropHere(this);
+        bool isCurrent = DragDropService.IsCurrent(this);
+        bool isValid = DragDropService.CanDropHere(this);
 
         Console.WriteLine($"{isCurrent} {isValid}");
+
+        if (DragDropService == null)
+        {
+            classes.Add("mud-error");
+        }
 
         if (isCurrent && isValid)
         {
@@ -159,7 +166,7 @@
 
     private void DragOverZone()
     {
-        dragDropService.SetOver(this);
+        DragDropService.SetOver(this);
         if (emptyAndHovering)
         {
             StateHasChanged();
@@ -174,7 +181,7 @@
     private void DragOverItem(int index)
     {
         Console.WriteLine($"Dragged over {index}");
-        if (dragDropService.CanDropHere(this))
+        if (DragDropService.CanDropHere(this))
         {
             currentHoverIndex = index;
         }

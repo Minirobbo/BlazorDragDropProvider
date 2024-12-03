@@ -1,10 +1,11 @@
-﻿@typeparam TItem
-@inject DragDropService dragDropService
-@implements IDragDropSource
+﻿@using Microsoft.Extensions.DependencyInjection
+@inject IServiceProvider ServiceProvider
+@typeparam TItem where TItem : class
+@implements IDragDropSource<TItem>
 
-@foreach (object item in Items)
+@foreach (TItem item in Items)
 {
-    <div draggable="true" @ondragover:preventDefault ondragstart="@(() => dragDropService.StartDrag(this, item))" ondragend="@dragDropService.StopDrag">
+    <div class="@(DragDropService == null ? "mud-error" : "")" draggable="true" @ondragover:preventDefault ondragstart="@(() => DragDropService.StartDrag(this, item))" ondragend="@DragDropService.StopDrag">
         @ItemRenderer((TItem)item)
     </div>
 }
@@ -14,7 +15,7 @@
     public required RenderFragment<TItem> ItemRenderer { get; set; }
 
     [Parameter]
-    public required List<object> Items { get; set; }
+    public required List<TItem> Items { get; set; }
 
     [Parameter]
     public bool RenewableItems { get; set; } = false;
@@ -22,7 +23,10 @@
     [Parameter]
     public string? Title { get; set; } = null;
 
-    public void RemoveItem(object item)
+    [CascadingParameter]
+    private DragDropService<TItem> DragDropService { get; set; }
+
+    public void RemoveItem(TItem item)
     {
         if (!RenewableItems)
         {
